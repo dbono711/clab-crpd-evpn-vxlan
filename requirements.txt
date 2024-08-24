@@ -1,0 +1,7 @@
+ansible==9.5.1
+ncclient==0.6.15
+xmltodict==0.13.0
+openai==1.35.7
+python-dotenv==1.0.1
+tiktoken==0.7.0
+Flask==3.0.3

@@ -1,0 +1,72 @@
+name: crpd-evpn-vxlan
+
+mgmt:
+  network: br-crpd-evpn-vxlan
+  ipv4-subnet: 10.0.0.0/24
+
+topology:
+  defaults:
+    license: junos.lic
+  kinds:
+    crpd:
+      image: crpd:22.4R1-S2.1
+  nodes:
+
+    # spine switches
+    spine01:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.2
+      ports:
+        - 10022:10022
+      startup-config: spine01/config
+    spine02:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.3
+      ports:
+        - 10122:10122
+      startup-config: spine02/config
+    
+    # leaf switches
+    leaf01:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.4
+      ports:
+        - 10222:10222
+      startup-config: leaf01/config
+    leaf02:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.5
+      ports:
+        - 10322:10322
+      startup-config: leaf02/config
+    leaf03:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.6
+      ports:
+        - 10422:10422
+      startup-config: leaf03/config
+    
+    # clients
+    client1:
+      kind: linux
+      image: wbitt/network-multitool:alpine-extra
+      mgmt-ipv4: 10.0.0.7
+    client2:
+      kind: linux
+      image: wbitt/network-multitool:alpine-extra
+      mgmt-ipv4: 10.0.0.8
+    client3:
+      kind: linux
+      image: wbitt/network-multitool:alpine-extra
+      mgmt-ipv4: 10.0.0.9
+
+  links:
+    - endpoints: ["spine01:eth1", "leaf01:eth1"]
+    - endpoints: ["spine01:eth2", "leaf02:eth1"]
+    - endpoints: ["spine01:eth3", "leaf03:eth1"]
+    - endpoints: ["spine02:eth1", "leaf01:eth2"]
+    - endpoints: ["spine02:eth2", "leaf02:eth2"]
+    - endpoints: ["spine02:eth3", "leaf03:eth2"]
+    - endpoints: ["client1:eth1", "leaf01:eth3"]
+    - endpoints: ["client2:eth1", "leaf02:eth3"]
+    - endpoints: ["client3:eth1", "leaf03:eth3"]

@@ -1,0 +1,43 @@
+set interfaces eth1 description to_leaf01
+set interfaces eth1 unit 0 family inet address 10.2.0.0/31
+set interfaces eth2 description to_leaf02
+set interfaces eth2 unit 0 family inet address 10.2.0.2/31
+set interfaces eth3 description to_leaf03
+set interfaces eth3 unit 0 family inet address 10.2.0.8/31
+set interfaces lo0 unit 0 family inet address 10.1.0.1/32
+set policy-options policy-statement underlay-spine-out term TERM1 from protocol direct
+set policy-options policy-statement underlay-spine-out term TERM1 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-spine-out term TERM1 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-spine-out term TERM1 then accept
+set policy-options policy-statement underlay-spine-out term TERM2 from protocol bgp
+set policy-options policy-statement underlay-spine-out term TERM2 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-spine-out term TERM2 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-spine-out term TERM2 then accept
+set policy-options policy-statement underlay-spine-out term DEFAULT_REJECT then reject
+set routing-options router-id 10.1.0.1
+set protocols bgp group EBGP_Underlay type external
+set protocols bgp group EBGP_Underlay export underlay-spine-out
+set protocols bgp group EBGP_Underlay local-as 65500
+set protocols bgp group EBGP_Underlay multipath multiple-as
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.1 description to_leaf01
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.1 peer-as 65502
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.3 description to_leaf02
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.3 peer-as 65503
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.9 description to_leaf03
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.9 peer-as 65504
+set protocols bgp group IBGP_Overlay_Clients type internal
+set protocols bgp group IBGP_Overlay_Clients local-address 10.1.0.1
+set protocols bgp group IBGP_Overlay_Clients family evpn signaling
+set protocols bgp group IBGP_Overlay_Clients cluster 10.1.0.1
+set protocols bgp group IBGP_Overlay_Clients local-as 65555
+set protocols bgp group IBGP_Overlay_Clients multipath
+set protocols bgp group IBGP_Overlay_Clients neighbor 10.1.0.3 description to_leaf01
+set protocols bgp group IBGP_Overlay_Clients neighbor 10.1.0.4 description to_leaf02
+set protocols bgp group IBGP_Overlay_Clients neighbor 10.1.0.5 description to_leaf03
+set protocols bgp group IBGP_Overlay_Clients vpn-apply-export
+set protocols bgp group IBGP_Overlay_Spine type internal
+set protocols bgp group IBGP_Overlay_Spine local-address 10.1.0.1
+set protocols bgp group IBGP_Overlay_Spine family evpn signaling
+set protocols bgp group IBGP_Overlay_Spine local-as 65555
+set protocols bgp group IBGP_Overlay_Spine multipath
+set protocols bgp group IBGP_Overlay_Spine neighbor 10.1.0.2 description to_spine02

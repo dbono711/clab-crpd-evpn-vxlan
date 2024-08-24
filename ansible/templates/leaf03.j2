@@ -1,0 +1,68 @@
+set interfaces eth1 description to_spine01
+set interfaces eth1 unit 0 family inet address 10.2.0.9/31
+set interfaces eth2 description to_spine02
+set interfaces eth2 unit 0 family inet address 10.2.0.11/31
+set interfaces eth3 description to_client3
+set interfaces eth3 unit 20 vlan-id 20
+set interfaces eth3 unit 20 encapsulation vlan-bridge
+set interfaces irb unit 20 family inet address 10.10.2.254/24
+set interfaces irb unit 20 mac 00:00:5e:00:53:aa
+set interfaces lo0 unit 0 family inet address 10.1.0.5/32
+set policy-options policy-statement LB term term1 from protocol evpn
+set policy-options policy-statement LB term term1 then load-balance per-packet
+set policy-options policy-statement LB term term1 then accept
+set policy-options policy-statement LB term term2 then load-balance per-packet
+set policy-options policy-statement LB term term2 then accept
+set policy-options policy-statement t5-export-999 term TERM1 from protocol direct
+set policy-options policy-statement t5-export-999 term TERM1 from route-filter 10.10.1.0/24 exact
+set policy-options policy-statement t5-export-999 term TERM1 from route-filter 10.10.2.0/24 exact
+set policy-options policy-statement t5-export-999 term TERM1 then accept
+set policy-options policy-statement underlay-leaf-out term TERM1 from protocol direct
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 then accept
+set policy-options policy-statement underlay-leaf-out term TERM2 from protocol bgp
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 then accept
+set policy-options policy-statement underlay-leaf-out term DEFAULT_REJECT then reject
+set routing-instances l2_cloud instance-type mac-vrf
+set routing-instances l2_cloud protocols evpn encapsulation vxlan
+set routing-instances l2_cloud protocols evpn default-gateway do-not-advertise
+set routing-instances l2_cloud service-type vlan-aware
+set routing-instances l2_cloud vtep-source-interface lo.0
+set routing-instances l2_cloud bridge-domains bd20 vlan-id 20
+set routing-instances l2_cloud bridge-domains bd20 interface eth3.20
+set routing-instances l2_cloud bridge-domains bd20 routing-interface irb.20
+set routing-instances l2_cloud bridge-domains bd20 vxlan vni 120
+set routing-instances l2_cloud bridge-domains bd20 vxlan destination-udp-port 4790
+set routing-instances l2_cloud route-distinguisher 10.1.0.5:1
+set routing-instances l2_cloud vrf-target target:65555L:1
+set routing-instances l2_cloud_tenant instance-type vrf
+set routing-instances l2_cloud_tenant routing-options multipath
+set routing-instances l2_cloud_tenant protocols evpn default-gateway do-not-advertise
+set routing-instances l2_cloud_tenant protocols evpn ip-prefix-routes advertise direct-nexthop
+set routing-instances l2_cloud_tenant protocols evpn ip-prefix-routes encapsulation vxlan
+set routing-instances l2_cloud_tenant protocols evpn ip-prefix-routes vni 999
+set routing-instances l2_cloud_tenant protocols evpn ip-prefix-routes export t5-export-999
+set routing-instances l2_cloud_tenant interface irb.20
+set routing-instances l2_cloud_tenant route-distinguisher 10.1.0.5:999
+set routing-instances l2_cloud_tenant vrf-target target:999:1
+set routing-instances l2_cloud_tenant vrf-table-label
+set routing-options router-id 10.1.0.5
+set routing-options forwarding-table export LB
+set protocols bgp group EBGP_Underlay type external
+set protocols bgp group EBGP_Underlay export underlay-leaf-out
+set protocols bgp group EBGP_Underlay local-as 65504
+set protocols bgp group EBGP_Underlay multipath multiple-as
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.8 description to_spine01
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.8 peer-as 65500
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.10 description to_spine02
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.10 peer-as 65501
+set protocols bgp group IBGP_Overlay type internal
+set protocols bgp group IBGP_Overlay local-address 10.1.0.5
+set protocols bgp group IBGP_Overlay family evpn signaling
+set protocols bgp group IBGP_Overlay local-as 65555
+set protocols bgp group IBGP_Overlay multipath
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.1 description to_spine01
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.2 description to_spine02

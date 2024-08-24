@@ -1,0 +1,12 @@
+[spine]
+spine01
+spine02
+
+[leaf]
+leaf01
+leaf02
+leaf03
+
+[fabric:children]
+spine
+leaf
