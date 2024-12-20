@@ -3,11 +3,9 @@ __pycache__
 .DS_store
 .venv/
 *.code-workspace
+*.log
 clab-*
 junos.lic
-log.txt
-logs.log
-setup.log
 nohup.out
 secrets.env
 settings.json
