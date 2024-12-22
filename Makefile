@@ -4,7 +4,7 @@ VENV_DIR = .venv
 REQ_FILE = requirements.txt
 ANSIBLE_HOSTS = ansible/hosts
 ANSIBLE_PLAYBOOK = ansible/config.yaml
-CLIENTS = client1 client2 client3
+CLIENTS = west-client1 west-client2 east-client3
 
 define log
     echo "[$(shell date '+%Y-%m-%d %H:%M:%S')] $1" >> $(LOG_FILE)

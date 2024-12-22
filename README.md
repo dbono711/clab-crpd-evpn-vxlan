@@ -2,7 +2,7 @@
 
 ## Overview
 
-A three-stage Layer 3 Leaf/Spine (L3LS) EVPN fabric using [CONTAINERlab](https://containerlab.dev/) and [cRPD](https://www.juniper.net/documentation/us/en/software/crpd/crpd-deployment/topics/concept/understanding-crpd.html) nodes to enable Layer 2 (intra-VNI) and Layer 3 (inter-VNI) connectivity between three clients. The fabric generally follows the [Edge-Routed Bridging Overlay](https://www.juniper.net/documentation/us/en/software/nce/sg-005-data-center-fabric/topics/task/edge-routed-overlay-cloud-dc-configuring.html) design guide and utilizes the MAC-VRF routing instance type. The underlay connectivity in this fabric is faciliated by eBGP/EVPN, and the overlay connectivity is facilitated by VXLAN.
+A three-stage Layer 3 Leaf/Spine (L3LS) EVPN/VXLAN fabric using [CONTAINERlab](https://containerlab.dev/) and [cRPD](https://www.juniper.net/documentation/us/en/software/crpd/crpd-deployment/topics/concept/understanding-crpd.html) nodes to enable Layer 2 (intra-VNI) and Layer 3 (inter-VNI) connectivity between three clients, and a firewall.
 
 ## Requirements
 
@@ -24,57 +24,69 @@ A three-stage Layer 3 Leaf/Spine (L3LS) EVPN fabric using [CONTAINERlab](https:/
 
 ```mermaid
 graph TD
-  leaf01---spine01
-  leaf01---spine02
-  leaf02---spine01
-  leaf02---spine02
-  leaf03---spine01
-  leaf03---spine02
-  client1---leaf01
-  client2---leaf02
-  client3---leaf03
+  spine01---west-leaf01
+  spine01---west-leaf02
+  spine01---east-leaf03
+  spine01---border-leaf04
+  spine02---west-leaf01
+  spine02---west-leaf02
+  spine02---east-leaf03
+  spine02---border-leaf04
+  firewall01---border-leaf04
+  west-client1---west-leaf01
+  west-client2---west-leaf01
+  west-client2---west-leaf02
+  east-client3---east-leaf03
 ```
 
-## Resources
+## Network Resources
 
 ### IP Assignments
 
-_**NOTE**: The Overlay/VTEP assignments for spine01/spine02 are not actually implemented, or even required, since our VTEP's in this lab are on leaf01/leaf02/leaf03. The assignments are therefore just for consistency purposes_
+_**NOTE**: The Overlay/VTEP assignments for spine01/spine02 are not actually implemented, or even required, since our VTEP's in this lab are on the leaf switches. The assignments are therefore just for consistency purposes_
 
-| Scope              | Network       | Sub-Network    | Assignment     | Name            |
-| ------------------ | ------------- | -------------  | -------------  | -------         |
-| Management         | 10.0.0.0/24   |                | 10.0.0.2/24    | spine01         |
-| Management         | 10.0.0.0/24   |                | 10.0.0.3/24    | spine02         |
-| Management         | 10.0.0.0/24   |                | 10.0.0.4/24    | leaf01          |
-| Management         | 10.0.0.0/24   |                | 10.0.0.5/24    | leaf02          |
-| Management         | 10.0.0.0/24   |                | 10.0.0.6/24    | leaf03          |
-| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.1/32    | spine01         |
-| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.2/32    | spine02         |
-| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.3/32    | leaf01          |
-| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.4/32    | leaf02          |
-| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.5/32    | leaf03          |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.0/31    | 10.2.0.0/31    | spine01::leaf01 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.0/31    | 10.2.0.1/31    | leaf01::spine01 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.2/31    | 10.2.0.2/31    | spine01::leaf02 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.2/31    | 10.2.0.3/31    | leaf02::spine01 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.4/31    | 10.2.0.4/31    | spine02::leaf01 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.4/31    | 10.2.0.5/31    | leaf01::spine02 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.6/31    | 10.2.0.6/31    | spine02::leaf02 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.6/31    | 10.2.0.7/31    | leaf02::spine02 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.8/31    | 10.2.0.8/31    | spine01::leaf03 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.8/31    | 10.2.0.9/31    | leaf03::spine01 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.10/31   | 10.2.0.10/31   | spine02::leaf03 |
-| P2P Links          | 10.2.0.0/24   | 10.2.0.10/31   | 10.2.0.11/31   | leaf03::spine02 |
+| Scope              | Network       | Sub-Network    | Assignment     | Name                   |
+| ------------------ | ------------- | -------------  | -------------  | ---------------------- |
+| Management         | 10.0.0.0/24   |                | 10.0.0.2/24    | spine01                |
+| Management         | 10.0.0.0/24   |                | 10.0.0.3/24    | spine02                |
+| Management         | 10.0.0.0/24   |                | 10.0.0.4/24    | west-leaf01            |
+| Management         | 10.0.0.0/24   |                | 10.0.0.5/24    | west-leaf02            |
+| Management         | 10.0.0.0/24   |                | 10.0.0.6/24    | east-leaf03            |
+| Management         | 10.0.0.0/24   |                | 10.0.0.7/24    | border-leaf04          |
+| Management         | 10.0.0.0/24   |                | 10.0.0.8/24    | firewall01             |
+| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.1/32    | spine01                |
+| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.2/32    | spine02                |
+| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.3/32    | west-leaf01            |
+| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.4/32    | west-leaf02            |
+| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.5/32    | east-leaf03            |
+| Router ID (lo0.0)  | 10.1.0.0/24   |                | 10.1.0.6/32    | border-leaf04          |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.0/31    | 10.2.0.0/31    | spine01::west-leaf01   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.0/31    | 10.2.0.1/31    | west-leaf01::spine01   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.2/31    | 10.2.0.2/31    | spine01::west-leaf02   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.2/31    | 10.2.0.3/31    | west-leaf02::spine01   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.4/31    | 10.2.0.4/31    | spine01::east-leaf03   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.4/31    | 10.2.0.5/31    | east-leaf03::spine01   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.6/31    | 10.2.0.6/31    | spine01::border-leaf04 |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.6/31    | 10.2.0.7/31    | border-leaf04::spine01 |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.8/31    | 10.2.0.8/31    | spine02::west-leaf01   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.8/31    | 10.2.0.9/31    | west-leaf01::spine02   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.10/31   | 10.2.0.10/31   | spine02::west-leaf02   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.10/31   | 10.2.0.11/31   | west-leaf02::spine02   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.12/31   | 10.2.0.12/31   | spine02::east-leaf03   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.12/31   | 10.2.0.13/31   | east-leaf03::spine02   |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.14/31   | 10.2.0.14/31   | spine02::border-leaf04 |
+| P2P Links          | 10.2.0.0/24   | 10.2.0.14/31   | 10.2.0.15/31   | border-leaf04::spine02 |
 
 ### Underlay ASN Assignments
 
-| ASN   | Device  |
-| ----- | ------- |
-| 65500 | spine01 |
-| 65501 | spine02 |
-| 65502 | leaf01  |
-| 65503 | leaf02  |
-| 65504 | leaf03  |
+| ASN   | Device        |
+| ----- | ------------- |
+| 65500 | spine01       |
+| 65501 | spine02       |
+| 65502 | west-leaf01   |
+| 65503 | west-leaf02   |
+| 65504 | east-leaf03   |
+| 65505 | border-leaf04 |
 
 ### Overlay ASN Assignment
 
@@ -84,11 +96,9 @@ _**NOTE**: The Overlay/VTEP assignments for spine01/spine02 are not actually imp
 
 ### VXLAN Segments (L2VNI)
 
-| vni | name  | network      | leaf   | host    | host ip   | vlan | gateway     |
-| --- | ----  | ------------ | ------ | ------- | --------- | ---- | ----------- |
-| 110 | RED   | 10.10.1.0/24 | leaf01 | client1 | 10.10.1.1 | 10   | 10.10.1.254 |
-| 110 | RED   | 10.10.1.0/24 | leaf02 | client2 | 10.10.1.2 | 10   | 10.10.1.254 |
-| 120 | BLUE  | 10.10.2.0/24 | leaf03 | client3 | 10.10.2.1 | 20   | 10.10.2.254 |
+| vni   | name  | vlan | mac-vrf isolation | network       | leaf        | host         | host ip   | host gateway     |
+| ----- | ----  | ---- | ----------------- | ------------- | ----------- | ------------ | --------- | ---------------- |
+| 50101 | BLUE   | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01 | west-client1 | 10.10.1.1 | 10.10.1.254      |
 
 ### VXLAN Tenants (L3VNI)
 

@@ -27,46 +27,67 @@ topology:
       startup-config: spine02/config
     
     # leaf switches
-    leaf01:
+    west-leaf01:
       kind: crpd
       mgmt-ipv4: 10.0.0.4
       ports:
         - 10222:10222
       startup-config: leaf01/config
-    leaf02:
+    west-leaf02:
       kind: crpd
       mgmt-ipv4: 10.0.0.5
       ports:
         - 10322:10322
       startup-config: leaf02/config
-    leaf03:
+    east-leaf03:
       kind: crpd
       mgmt-ipv4: 10.0.0.6
       ports:
         - 10422:10422
       startup-config: leaf03/config
+    border-leaf04:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.7
+      ports:
+        - 10522:10522
+      startup-config: leaf04/config
+    
+    # firewall
+    firewall01:
+      kind: crpd
+      mgmt-ipv4: 10.0.0.8
+      ports:
+        - 10622:10622
+      startup-config: spine01/config
     
     # clients
-    client1:
+    west-client1:
       kind: linux
       image: wbitt/network-multitool:alpine-extra
-      mgmt-ipv4: 10.0.0.7
-    client2:
+      mgmt-ipv4: 10.0.0.10
+    west-client2:
       kind: linux
       image: wbitt/network-multitool:alpine-extra
-      mgmt-ipv4: 10.0.0.8
-    client3:
+      mgmt-ipv4: 10.0.0.11
+    east-client3:
       kind: linux
       image: wbitt/network-multitool:alpine-extra
-      mgmt-ipv4: 10.0.0.9
+      mgmt-ipv4: 10.0.0.12
 
   links:
-    - endpoints: ["spine01:eth1", "leaf01:eth1"]
-    - endpoints: ["spine01:eth2", "leaf02:eth1"]
-    - endpoints: ["spine01:eth3", "leaf03:eth1"]
-    - endpoints: ["spine02:eth1", "leaf01:eth2"]
-    - endpoints: ["spine02:eth2", "leaf02:eth2"]
-    - endpoints: ["spine02:eth3", "leaf03:eth2"]
-    - endpoints: ["client1:eth1", "leaf01:eth3"]
-    - endpoints: ["client2:eth1", "leaf02:eth3"]
-    - endpoints: ["client3:eth1", "leaf03:eth3"]
+    - endpoints: ["spine01:eth1", "west-leaf01:eth1"]
+    - endpoints: ["spine01:eth2", "west-leaf02:eth1"]
+    - endpoints: ["spine01:eth3", "east-leaf03:eth1"]
+    - endpoints: ["spine01:eth4", "border-leaf04:eth1"]
+
+    - endpoints: ["spine02:eth1", "west-leaf01:eth2"]
+    - endpoints: ["spine02:eth2", "west-leaf02:eth2"]
+    - endpoints: ["spine02:eth3", "east-leaf03:eth2"]
+    - endpoints: ["spine02:eth4", "border-leaf04:eth2"]
+
+    - endpoints: ["firewall01:eth1", "border-leaf04:eth3"]
+
+    - endpoints: ["west-client1:eth1", "west-leaf01:eth3"]
+    - endpoints: ["west-client2:eth1", "west-leaf01:eth4"]
+    - endpoints: ["west-client2:eth2", "west-leaf02:eth4"]
+    - endpoints: ["east-client3:eth1", "east-leaf03:eth3"]

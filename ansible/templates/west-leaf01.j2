@@ -1,0 +1,36 @@
+set interfaces eth1 description to_spine01
+set interfaces eth1 unit 0 family inet address 10.2.0.1/31
+set interfaces eth2 description to_spine02
+set interfaces eth2 unit 0 family inet address 10.2.0.9/31
+set interfaces lo0 unit 0 family inet address 10.1.0.3/32
+set policy-options policy-statement LB term term1 from protocol evpn
+set policy-options policy-statement LB term term1 then load-balance per-packet
+set policy-options policy-statement LB term term1 then accept
+set policy-options policy-statement LB term term2 then load-balance per-packet
+set policy-options policy-statement LB term term2 then accept
+set policy-options policy-statement underlay-leaf-out term TERM1 from protocol direct
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 then accept
+set policy-options policy-statement underlay-leaf-out term TERM2 from protocol bgp
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 then accept
+set policy-options policy-statement underlay-leaf-out term DEFAULT_REJECT then reject
+set routing-options router-id 10.1.0.3
+set routing-options forwarding-table export LB
+set protocols bgp group EBGP_Underlay type external
+set protocols bgp group EBGP_Underlay export underlay-leaf-out
+set protocols bgp group EBGP_Underlay local-as 65502
+set protocols bgp group EBGP_Underlay multipath multiple-as
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.0 description to_spine01
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.0 peer-as 65500
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.8 description to_spine02
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.8 peer-as 65501
+set protocols bgp group IBGP_Overlay type internal
+set protocols bgp group IBGP_Overlay local-address 10.1.0.3
+set protocols bgp group IBGP_Overlay family evpn signaling
+set protocols bgp group IBGP_Overlay local-as 65555
+set protocols bgp group IBGP_Overlay multipath
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.1 description to_spine01
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.2 description to_spine02
