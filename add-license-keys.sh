@@ -1,5 +1,5 @@
 #!/bin/bash
-SWITCHES=("spine01" "spine02" "leaf01" "leaf02" "leaf03")
+SWITCHES=("spine01" "spine02" "west-leaf01" "west-leaf02" "east-leaf03" "border-leaf04" "firewall01")
 
 for switch in ${SWITCHES[@]}; do
   echo -n "Checking for installed cRPD license on $switch..."

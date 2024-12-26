@@ -32,25 +32,25 @@ topology:
       mgmt-ipv4: 10.0.0.4
       ports:
         - 10222:10222
-      startup-config: leaf01/config
+      startup-config: west-leaf01/config
     west-leaf02:
       kind: crpd
       mgmt-ipv4: 10.0.0.5
       ports:
         - 10322:10322
-      startup-config: leaf02/config
+      startup-config: west-leaf02/config
     east-leaf03:
       kind: crpd
       mgmt-ipv4: 10.0.0.6
       ports:
         - 10422:10422
-      startup-config: leaf03/config
+      startup-config: east-leaf03/config
     border-leaf04:
       kind: crpd
       mgmt-ipv4: 10.0.0.7
       ports:
         - 10522:10522
-      startup-config: leaf04/config
+      startup-config: border-leaf04/config
     
     # firewall
     firewall01:
@@ -58,7 +58,7 @@ topology:
       mgmt-ipv4: 10.0.0.8
       ports:
         - 10622:10622
-      startup-config: spine01/config
+      startup-config: firewall01/config
     
     # clients
     west-client1:

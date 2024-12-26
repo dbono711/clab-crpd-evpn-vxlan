@@ -96,9 +96,10 @@ _**NOTE**: The Overlay/VTEP assignments for spine01/spine02 are not actually imp
 
 ### VXLAN Segments (L2VNI)
 
-| vni   | name  | vlan | mac-vrf isolation | network       | leaf        | host         | host ip   | host gateway     |
-| ----- | ----  | ---- | ----------------- | ------------- | ----------- | ------------ | --------- | ---------------- |
-| 50101 | BLUE   | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01 | west-client1 | 10.10.1.1 | 10.10.1.254      |
+| vni   | name  | vlan | mac-vrf isolation | network       | leaf           | host         | host ip     | host gateway     |
+| ----- | ----  | ---- | ----------------- | ------------- | -------------- | ------------ | ----------- | ---------------- |
+| 50101 | BLUE   | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01    | west-client1 | 10.10.1.1   | 10.10.1.254      |
+| 50101 | BLUE   | 101  | vlan-based       | 10.10.1.0/24  | border-leaf04  | firewall01   | 10.10.1.254 | N/A              |
 
 ### VXLAN Tenants (L3VNI)
 

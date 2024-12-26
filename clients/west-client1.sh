@@ -8,6 +8,7 @@ iface eth1.101 inet static
   up ip link set dev eth1.101 up
   address 10.10.1.1
   netmask 255.255.255.0
+  gateway 10.10.1.254
 
 EOF
 
