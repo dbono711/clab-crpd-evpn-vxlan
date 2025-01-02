@@ -23,4 +23,4 @@ firewall01
 [fabric:children]
 spine
 leaf
-[firewall]
+firewall

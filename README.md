@@ -34,7 +34,6 @@ graph TD
   spine02---border-leaf04
   firewall01---border-leaf04
   west-client1---west-leaf01
-  west-client2---west-leaf01
   west-client2---west-leaf02
   east-client3---east-leaf03
 ```
@@ -96,10 +95,16 @@ _**NOTE**: The Overlay/VTEP assignments for spine01/spine02 are not actually imp
 
 ### VXLAN Segments (L2VNI)
 
-| vni   | name  | vlan | mac-vrf isolation | network       | leaf           | host         | host ip     | host gateway     |
-| ----- | ----  | ---- | ----------------- | ------------- | -------------- | ------------ | ----------- | ---------------- |
-| 50101 | BLUE   | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01    | west-client1 | 10.10.1.1   | 10.10.1.254      |
-| 50101 | BLUE   | 101  | vlan-based       | 10.10.1.0/24  | border-leaf04  | firewall01   | 10.10.1.254 | N/A              |
+| vni   | name     | vlan | mac-vrf isolation | network       | leaf           | host          | host ip     | host gateway     |
+| ----- | -------  | ---- | ----------------- | ------------- | -------------- | ------------- | ----------- | ---------------- |
+| 50101 | BLUE     | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01    | west-client1   | 10.10.1.1   | 10.10.1.254      |
+| 50101 | BLUE     | 101  | vlan-based       | 10.10.1.0/24  | border-leaf04  | firewall01     | 10.10.1.254 | N/A              |
+| 50102 | RED      | 102  | vlan-based       | 10.10.2.0/24  | west-leaf01    | west-client1   | 10.10.2.1   | 10.10.2.254      |
+| 50102 | RED      | 102  | vlan-based       | 10.10.2.0/24  | border-leaf04  | firewall01     | 10.10.2.254 | N/A              |
+| 50103 | GREEN    | 103  | vlan-aware       | 10.10.3.0/24  | west-leaf02    | west-client2   | 10.10.3.1   | 10.10.3.254      |
+| 50103 | GREEN    | 103  | vlan-aware       | 10.10.3.0/24  | east-leaf03    | east-client3   | 10.10.3.2   | 10.10.3.254      |
+| 50104 | ORANGE   | 104  | vlan-aware       | 10.10.4.0/24  | west-leaf02    | west-client2   | 10.10.4.1   | 10.10.4.254      |
+| 50104 | ORANGE   | 104  | vlan-aware       | 10.10.4.0/24  | east-leaf03    | east-client3   | 10.10.4.2   | 10.10.4.254      |
 
 ### VXLAN Tenants (L3VNI)
 

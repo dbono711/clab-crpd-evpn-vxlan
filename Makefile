@@ -80,7 +80,7 @@ validate-only: initialize_log
 .PHONY: clean
 clean: initialize_log
 	@$(call log,Cleaning up...)
-	@sudo clab destroy --topo setup.yml >> $(LOG_FILE) 2>&1
+	@sudo clab destroy --cleanup --topo setup.yml >> $(LOG_FILE) 2>&1
 	@rm -rf $(VENV_DIR) >> $(LOG_FILE) 2>&1
 	@$(call log,Cleaning complete.)
 	@echo "Cleaning complete. Check 'setup.log' for detailed output."
