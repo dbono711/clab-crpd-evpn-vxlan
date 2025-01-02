@@ -95,22 +95,22 @@ _**NOTE**: The Overlay/VTEP assignments for spine01/spine02 are not actually imp
 
 ### VXLAN Segments (L2VNI)
 
-| vni   | name     | vlan | mac-vrf isolation | network       | leaf           | host          | host ip     | host gateway     |
-| ----- | -------  | ---- | ----------------- | ------------- | -------------- | ------------- | ----------- | ---------------- |
-| 50101 | BLUE     | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01    | west-client1   | 10.10.1.1   | 10.10.1.254      |
-| 50101 | BLUE     | 101  | vlan-based       | 10.10.1.0/24  | border-leaf04  | firewall01     | 10.10.1.254 | N/A              |
-| 50102 | RED      | 102  | vlan-based       | 10.10.2.0/24  | west-leaf01    | west-client1   | 10.10.2.1   | 10.10.2.254      |
-| 50102 | RED      | 102  | vlan-based       | 10.10.2.0/24  | border-leaf04  | firewall01     | 10.10.2.254 | N/A              |
-| 50103 | GREEN    | 103  | vlan-aware       | 10.10.3.0/24  | west-leaf02    | west-client2   | 10.10.3.1   | 10.10.3.254      |
-| 50103 | GREEN    | 103  | vlan-aware       | 10.10.3.0/24  | east-leaf03    | east-client3   | 10.10.3.2   | 10.10.3.254      |
-| 50104 | ORANGE   | 104  | vlan-aware       | 10.10.4.0/24  | west-leaf02    | west-client2   | 10.10.4.1   | 10.10.4.254      |
-| 50104 | ORANGE   | 104  | vlan-aware       | 10.10.4.0/24  | east-leaf03    | east-client3   | 10.10.4.2   | 10.10.4.254      |
+| vni   | name      | vlan | mac-vrf isolation | network       | leaf           | host          | host ip     | host gateway     |
+| ----- | --------  | ---- | ----------------- | ------------- | -------------- | ------------- | ----------- | ---------------- |
+| 50101 | BLUE      | 101  | vlan-based       | 10.10.1.0/24  | west-leaf01    | west-client1   | 10.10.1.1   | 10.10.1.254      |
+| 50101 | BLUE      | 101  | vlan-based       | 10.10.1.0/24  | border-leaf04  | firewall01     | 10.10.1.254 | N/A              |
+| 50102 | RED       | 102  | vlan-based       | 10.10.2.0/24  | west-leaf01    | west-client1   | 10.10.2.1   | 10.10.2.254      |
+| 50102 | RED       | 102  | vlan-based       | 10.10.2.0/24  | border-leaf04  | firewall01     | 10.10.2.254 | N/A              |
+| 50103 | GREEN1    | 103  | vlan-aware       | 10.10.3.0/24  | west-leaf02    | west-client2   | 10.10.3.1   | 10.10.3.254      |
+| 50103 | GREEN1    | 103  | vlan-aware       | 10.10.3.0/24  | east-leaf03    | east-client3   | 10.10.3.2   | 10.10.3.254      |
+| 50104 | GREEN2    | 104  | vlan-aware       | 10.10.4.0/24  | west-leaf02    | west-client2   | 10.10.4.1   | 10.10.4.254      |
+| 50104 | GREEN2    | 104  | vlan-aware       | 10.10.4.0/24  | east-leaf03    | east-client3   | 10.10.4.2   | 10.10.4.254      |
 
 ### VXLAN Tenants (L3VNI)
 
-| vni | name   |
-| --- | ----   |
-| 999 | ORANGE |
+| vni | name         |
+| --- | ------------ |
+| 999 | GREEN-TENANT |
 
 ## Deployment
 
@@ -134,8 +134,6 @@ make all
 - Loops through each client to execute the configuration SHELL scripts within the [clients](clients) folder
   - The script configures the clients Ethernet/VLAN interface connected to the leaf
 - Executes an Ansible playbook for configuring the fabric underlay, overlay, EVPN, & VXLAN on each cRPD node
-- Executes a PING from ```client1``` to ```client2``` to validate intra-VNI data plane connectivity between clients
-- Executes a PING from ```client1``` to ```client3``` to validate inter-VNI data plane connectivity between clients
 
 ## Accessing the container SHELL
 
@@ -181,7 +179,7 @@ bash-5.1#
 
 Here is an example on how to capture packets directly on the host which CONTAINERlab is running
 
-```sudo ip netns exec clab-crpd-evpn-vxlan-leaf01 tcpdump -nni eth1```
+```sudo ip netns exec clab-crpd-evpn-vxlan-west-leaf01 tcpdump -nni eth1```
 
 Here is an example on how to capture packets from a remote host, to the host which CONTAINERlab is running (Note that this example is piping directly to Wireshark which in my case is running on my MAC OS X host)
 

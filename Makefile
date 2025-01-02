@@ -53,13 +53,6 @@ configure: lab
 	@$(call log,Running shell scripts for client configuration...)
 	@$(call client_setup) >> $(LOG_FILE) 2>&1
 
-# .PHONY: validate
-# validate: configure
-# 	@sleep 5
-# 	@$(call log,Executing validation testing...)
-# 	@$(VENV_DIR)/bin/python3 validate.py >> $(LOG_FILE) 2>&1
-# 	@echo "Complete. Check 'setup.log' for detailed output."
-
 all: configure
 
 .PHONY: configure-only
@@ -70,12 +63,6 @@ configure-only: initialize_log
 	@$(call log,Running shell scripts for client configuration...)
 	@$(call client_setup) >> $(LOG_FILE) 2>&1
 	@echo "Configuration complete. Check 'setup.log' for detailed output."
-
-.PHONY: validate-only
-validate-only: initialize_log
-	@$(call log,Executing validation testing...)
-	@$(VENV_DIR)/bin/python3 validate.py >> $(LOG_FILE) 2>&1
-	@echo "Validation complete. Check 'setup.log' for detailed output."
 
 .PHONY: clean
 clean: initialize_log
