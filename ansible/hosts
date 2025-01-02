@@ -2,11 +2,25 @@
 spine01
 spine02
 
-[leaf]
-leaf01
-leaf02
-leaf03
+[west]
+west-leaf01
+west-leaf02
+
+[east]
+east-leaf03
+
+[border]
+border-leaf04
+
+[leaf:children]
+west
+east
+border
+
+[firewall]
+firewall01
 
 [fabric:children]
 spine
 leaf
+firewall

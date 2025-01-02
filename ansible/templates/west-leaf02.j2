@@ -1,0 +1,78 @@
+set interfaces eth1 description to_spine01
+set interfaces eth1 unit 0 family inet address 10.2.0.3/31
+set interfaces eth2 description to_spine02
+set interfaces eth2 unit 0 family inet address 10.2.0.11/31
+set interfaces eth3 description to_west-client2
+set interfaces eth3 unit 103 vlan-id 103
+set interfaces eth3 unit 103 encapsulation vlan-bridge
+set interfaces eth3 unit 104 vlan-id 104
+set interfaces eth3 unit 104 encapsulation vlan-bridge
+set interfaces irb unit 103 family inet address 10.10.3.254/24
+set interfaces irb unit 103 mac 00:00:5e:00:53:aa
+set interfaces irb unit 104 family inet address 10.10.4.254/24
+set interfaces irb unit 104 mac 00:00:5e:00:54:aa
+set interfaces lo0 unit 0 family inet address 10.1.0.4/32
+set policy-options policy-statement LB term term1 from protocol evpn
+set policy-options policy-statement LB term term1 then load-balance per-packet
+set policy-options policy-statement LB term term1 then accept
+set policy-options policy-statement LB term term2 then load-balance per-packet
+set policy-options policy-statement LB term term2 then accept
+set policy-options policy-statement t5-export-999 term TERM1 from protocol direct
+set policy-options policy-statement t5-export-999 term TERM1 from route-filter 10.10.3.0/24 exact
+set policy-options policy-statement t5-export-999 term TERM1 from route-filter 10.10.4.0/24 exact
+set policy-options policy-statement t5-export-999 term TERM1 then accept
+set policy-options policy-statement underlay-leaf-out term TERM1 from protocol direct
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 then accept
+set policy-options policy-statement underlay-leaf-out term TERM2 from protocol bgp
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 then accept
+set policy-options policy-statement underlay-leaf-out term DEFAULT_REJECT then reject
+set routing-instances GREEN instance-type mac-vrf
+set routing-instances GREEN protocols evpn encapsulation vxlan
+set routing-instances GREEN protocols evpn default-gateway do-not-advertise
+set routing-instances GREEN service-type vlan-aware
+set routing-instances GREEN vtep-source-interface lo.0
+set routing-instances GREEN bridge-domains bd103 vlan-id 103
+set routing-instances GREEN bridge-domains bd103 interface eth3.103
+set routing-instances GREEN bridge-domains bd103 routing-interface irb.103
+set routing-instances GREEN bridge-domains bd103 vxlan vni 50103
+set routing-instances GREEN bridge-domains bd103 vxlan destination-udp-port 4790
+set routing-instances GREEN bridge-domains bd104 vlan-id 104
+set routing-instances GREEN bridge-domains bd104 interface eth3.104
+set routing-instances GREEN bridge-domains bd104 routing-interface irb.104
+set routing-instances GREEN bridge-domains bd104 vxlan vni 50104
+set routing-instances GREEN bridge-domains bd104 vxlan destination-udp-port 4790
+set routing-instances GREEN route-distinguisher 10.1.0.4:3
+set routing-instances GREEN vrf-target target:65555L:3
+set routing-instances GREEN-TENANT instance-type vrf
+set routing-instances GREEN-TENANT routing-options multipath
+set routing-instances GREEN-TENANT protocols evpn default-gateway do-not-advertise
+set routing-instances GREEN-TENANT protocols evpn ip-prefix-routes advertise direct-nexthop
+set routing-instances GREEN-TENANT protocols evpn ip-prefix-routes encapsulation vxlan
+set routing-instances GREEN-TENANT protocols evpn ip-prefix-routes vni 999
+set routing-instances GREEN-TENANT protocols evpn ip-prefix-routes export t5-export-999
+set routing-instances GREEN-TENANT interface irb.103
+set routing-instances GREEN-TENANT interface irb.104
+set routing-instances GREEN-TENANT route-distinguisher 10.1.0.4:999
+set routing-instances GREEN-TENANT vrf-target target:999:3
+set routing-instances GREEN-TENANT vrf-table-label
+set routing-options router-id 10.1.0.4
+set routing-options forwarding-table export LB
+set protocols bgp group EBGP_Underlay type external
+set protocols bgp group EBGP_Underlay export underlay-leaf-out
+set protocols bgp group EBGP_Underlay local-as 65503
+set protocols bgp group EBGP_Underlay multipath multiple-as
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.2 description to_spine01
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.2 peer-as 65500
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.10 description to_spine02
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.10 peer-as 65501
+set protocols bgp group IBGP_Overlay type internal
+set protocols bgp group IBGP_Overlay local-address 10.1.0.4
+set protocols bgp group IBGP_Overlay family evpn signaling
+set protocols bgp group IBGP_Overlay local-as 65555
+set protocols bgp group IBGP_Overlay multipath
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.1 description to_spine01
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.2 description to_spine02

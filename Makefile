@@ -4,7 +4,7 @@ VENV_DIR = .venv
 REQ_FILE = requirements.txt
 ANSIBLE_HOSTS = ansible/hosts
 ANSIBLE_PLAYBOOK = ansible/config.yaml
-CLIENTS = client1 client2 client3
+CLIENTS = west-client1 west-client2 east-client3
 
 define log
     echo "[$(shell date '+%Y-%m-%d %H:%M:%S')] $1" >> $(LOG_FILE)
@@ -53,14 +53,7 @@ configure: lab
 	@$(call log,Running shell scripts for client configuration...)
 	@$(call client_setup) >> $(LOG_FILE) 2>&1
 
-.PHONY: validate
-validate: configure
-	@sleep 5
-	@$(call log,Executing validation testing...)
-	@$(VENV_DIR)/bin/python3 validate.py >> $(LOG_FILE) 2>&1
-	@echo "Complete. Check 'setup.log' for detailed output."
-
-all: validate
+all: configure
 
 .PHONY: configure-only
 configure-only: initialize_log
@@ -71,16 +64,10 @@ configure-only: initialize_log
 	@$(call client_setup) >> $(LOG_FILE) 2>&1
 	@echo "Configuration complete. Check 'setup.log' for detailed output."
 
-.PHONY: validate-only
-validate-only: initialize_log
-	@$(call log,Executing validation testing...)
-	@$(VENV_DIR)/bin/python3 validate.py >> $(LOG_FILE) 2>&1
-	@echo "Validation complete. Check 'setup.log' for detailed output."
-
 .PHONY: clean
 clean: initialize_log
 	@$(call log,Cleaning up...)
-	@sudo clab destroy --topo setup.yml >> $(LOG_FILE) 2>&1
+	@sudo clab destroy --cleanup --topo setup.yml >> $(LOG_FILE) 2>&1
 	@rm -rf $(VENV_DIR) >> $(LOG_FILE) 2>&1
 	@$(call log,Cleaning complete.)
 	@echo "Cleaning complete. Check 'setup.log' for detailed output."

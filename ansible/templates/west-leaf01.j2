@@ -1,0 +1,63 @@
+set interfaces eth1 description to_spine01
+set interfaces eth1 unit 0 family inet address 10.2.0.1/31
+set interfaces eth2 description to_spine02
+set interfaces eth2 unit 0 family inet address 10.2.0.9/31
+set interfaces eth3 description to_west-client1
+set interfaces eth3 unit 101 vlan-id 101
+set interfaces eth3 unit 101 encapsulation vlan-bridge
+set interfaces eth3 unit 102 vlan-id 102
+set interfaces eth3 unit 102 encapsulation vlan-bridge
+set interfaces lo0 unit 0 family inet address 10.1.0.3/32
+set policy-options policy-statement LB term term1 from protocol evpn
+set policy-options policy-statement LB term term1 then load-balance per-packet
+set policy-options policy-statement LB term term1 then accept
+set policy-options policy-statement LB term term2 then load-balance per-packet
+set policy-options policy-statement LB term term2 then accept
+set policy-options policy-statement underlay-leaf-out term TERM1 from protocol direct
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM1 then accept
+set policy-options policy-statement underlay-leaf-out term TERM2 from protocol bgp
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.1.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 from route-filter 10.2.0.0/24 prefix-length-range /32-/32
+set policy-options policy-statement underlay-leaf-out term TERM2 then accept
+set policy-options policy-statement underlay-leaf-out term DEFAULT_REJECT then reject
+set routing-instances BLUE instance-type mac-vrf
+set routing-instances BLUE protocols evpn encapsulation vxlan
+set routing-instances BLUE protocols evpn default-gateway no-gateway-community
+set routing-instances BLUE service-type vlan-based
+set routing-instances BLUE vtep-source-interface lo0.0
+set routing-instances BLUE bridge-domains bd101 vlan-id 101
+set routing-instances BLUE bridge-domains bd101 interface eth3.101
+set routing-instances BLUE bridge-domains bd101 vxlan vni 50101
+set routing-instances BLUE bridge-domains bd101 vxlan destination-udp-port 4790
+set routing-instances BLUE route-distinguisher 10.1.0.3:1
+set routing-instances BLUE vrf-target target:65555L:1
+set routing-instances RED instance-type mac-vrf
+set routing-instances RED protocols evpn encapsulation vxlan
+set routing-instances RED protocols evpn default-gateway no-gateway-community
+set routing-instances RED service-type vlan-based
+set routing-instances RED vtep-source-interface lo0.0
+set routing-instances RED bridge-domains bd102 vlan-id 102
+set routing-instances RED bridge-domains bd102 interface eth3.102
+set routing-instances RED bridge-domains bd102 vxlan vni 50102
+set routing-instances RED bridge-domains bd102 vxlan destination-udp-port 4790
+set routing-instances RED route-distinguisher 10.1.0.3:2
+set routing-instances RED vrf-target target:65555L:2
+set routing-options router-id 10.1.0.3
+set routing-options forwarding-table export LB
+set protocols bgp group EBGP_Underlay type external
+set protocols bgp group EBGP_Underlay export underlay-leaf-out
+set protocols bgp group EBGP_Underlay local-as 65502
+set protocols bgp group EBGP_Underlay multipath multiple-as
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.0 description to_spine01
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.0 peer-as 65500
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.8 description to_spine02
+set protocols bgp group EBGP_Underlay neighbor 10.2.0.8 peer-as 65501
+set protocols bgp group IBGP_Overlay type internal
+set protocols bgp group IBGP_Overlay local-address 10.1.0.3
+set protocols bgp group IBGP_Overlay family evpn signaling
+set protocols bgp group IBGP_Overlay local-as 65555
+set protocols bgp group IBGP_Overlay multipath
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.1 description to_spine01
+set protocols bgp group IBGP_Overlay neighbor 10.1.0.2 description to_spine02
