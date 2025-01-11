@@ -38,6 +38,8 @@ graph TD
   east-client3---east-leaf03
 ```
 
+![Topology](images/topology.png)
+
 ## Network Resources
 
 ### IP Assignments
